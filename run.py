@@ -1,22 +1,49 @@
 
+import os
 import sys
+import time
+import asyncio
 import discord
+from discord.ext import commands
 
-
-# Disables the SSL warning, that is printed to the console.
-#import requests.packages.urllib3
-#requests.packages.urllib3.disable_warnings()
 client = discord.Client()
 
-def fonc_exemple(message):
-    client.send_message(message.chanel,"It's a TEST!!!")
+@client.event
+async def on_ready():
+    print('Logged in as')
+    print(client.user.name)
+    print(client.user.id)
+    print('------')
+
+async def fonc_exemple(message):
+    print("test\n")
+    msg = 'Hello {0.author.mention}'.format(message)
+    await client.send_message(message.channel,msg)
 
 
-#alerte de connection
-@bot.command()
-async def joined(member : discord.Member):
-    """Says when a member joined."""
-    await bot.say('{0.name} joined in {0.joined_at}'.format(member))
+# supprime les n derniers messages (et l'appel à la fonction)
+async def clear(message):
+    all_messages = client.messages
+    target_channel = message.channel
+    
+    counter=1
+    m=message.content.split()
+    print(message.author,' supprime les ',m[1],' derniers messages')
+    max= int(m[1])+2
+    if(max > 10):
+        max = 12
+
+    for message_step in reversed(list(all_messages)):
+        
+        if (message_step.channel == target_channel ):
+            print(' counter:',counter,'\n')
+
+            if(counter>=max):
+                return
+            await client.delete_message(message_step)
+
+            counter = counter+1
+
 
 # switch pour les differentes commandes
 @client.event
@@ -26,18 +53,18 @@ async def on_message(message):
         return
     
     author = message.author
-    if message.content.startswith('exemple'):
-        fonc_exemple(message)
+    if message.content.startswith('!test'):
+        await fonc_exemple(message)
+    if message.content.startswith('!clear'):
+        await clear(message)
 
-
+# ceation du dir pour le bot si necessaire
+file_bool = os.path.exists("./bot_files")
+if not file_bool:
+    os.system('mkdir ./bot_files')
 
 # login et lancement du bot
-
-if len(sys.argv)<4 :
-    sys.exit("you need to enter your login, pwd and the serv invite")
-
-client.login(sys.argv[1], sys.argv[2])
-client.accept_invite(argv[3])
-client.run()
+client.login('token')
+client.run('MjI4NTU3MjQwNjIwMDIzODA4.CtEWMg.xvkO6IlHuhduLqYw7WmOBUtjjHs')
 
 
