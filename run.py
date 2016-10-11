@@ -131,7 +131,7 @@ async def godwin(message):
         godwin_dir[str(m[1])]=1
     save(godwin_dir,GOD_PATH)
     print('point attribué')
-    messretour = "Félicitation "+str(m[1]+" cela vous fait "+str(godwin_dir[str(m[1])])+" points Godwin!\n  http://publigeekaire.com/wp-content/uploads/2011/04/point-godwin.jpg  "
+    messretour = "Félicitation "+str(m[1])+" cela vous fait "+str(godwin_dir[str(m[1])])+" points Godwin!\n  http://publigeekaire.com/wp-content/uploads/2011/04/point-godwin.jpg  "
     await client.send_message(message.channel,messretour)
 
 
