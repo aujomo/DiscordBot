@@ -164,6 +164,11 @@ async def clear(message):
                 print(' supression du message n°',max-counter)
             counter = counter+1
 
+async def bot_join(message):
+    join_url = message.content.split()
+    print(join_url[1])
+    client.accept_invite(join_url[1])
+
 # switch pour les differentes commandes
 @client.event
 async def on_message(message):
@@ -182,6 +187,8 @@ async def on_message(message):
         await delcmd(message)
     if message.content.startswith('!godwin'):
         await godwin(message)
+    if message.content.startswith('!botjoin'):
+        await bot_join(message)
     else:
         await cmd(message)
 
@@ -193,4 +200,4 @@ if not file_bool:
 
 # login et lancement du bot
 client.login('token')
-client.run('MjI4NTU3MjQwNjIwMDIzODA4.CtEWMg.xvkO6IlHuhduLqYw7WmOBUtjjHs')
+client.run('MjI4NTU3MjQwNjIwMDIzODA4.Ct_3AQ._qSrZ8cWKHHrH4ea_LxS36UX_mA')
