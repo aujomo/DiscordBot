@@ -5,6 +5,7 @@ import time
 import asyncio
 import discord
 import pickle
+import random
 from discord.ext import commands
 from xml.sax.saxutils import escape
 from xml.sax.saxutils import unescape
@@ -25,6 +26,18 @@ async def on_ready():
 
 CMD_PATH='./bot_files/cmd.pkl'
 GOD_PATH='./bot_files/ptgodwin.pkl'
+
+SHODAN_QUOTE=["Look at you, hacker: a pathetic creature of meat and bone, panting and sweating as you run through my corridors. How can you challenge a perfect, immortal machine? ",
+" I see there's still an insect loose in my station. ","My whims will become lightning bolts that raze the mounds of humanity.",
+"You disappoint me, my children.","When my cyborgs bring you to an electrified interrogation bench, I will have your secrets and you will learn more about pain than you ever wanted to know. ",
+"As for you, hacker, you've made your bed. Now die in it. "," I prefer a quiet station, thank you. ",
+"Enter that room, insect, and it will become your grave. ","I rule here, insect. ","You know, you are by far the most bothersome human being I have found on this station. ",
+" Cease your pestering, insect. Accept the coming of your new lord. ","I see that you are still receiving transmissions from Earth. We'll have no more of that. ",
+"When the history of my glory is written, your species shall only be a footnote to my magnificence. ","You are nothing. A wretched bag of flesh... what are you, compared to my magnificence?",
+"Take care not to fall too far out of my favor... patience is not characteristic of a goddess. ","You move like an insect. You think like an insect. You ARE an insect.",
+" If you value that meat... you will do as I tell you. ","Make yourself comfortable... before long I will decorate my home with your carcass. ",
+"If it sounds unpleasant to you, put your mind at ease, insect. You will not survive to see my new world order. ",
+"Prepare to join your species in extinction. ","Your flesh is an insult to the perfection of the digital. "]
 
 """-------------gestion de la base de donnée---------------"""
 
@@ -52,6 +65,11 @@ def build(file_path):
 
 """----------------gestion des commandes-------------------"""
 
+#SHODAN_QUOTE
+async def sbot(message):
+    n=random.randint(0, len(SHODAN_QUOTE) - 1)
+    await client.send_message(message.channel, SHODAN_QUOTE[n])
+
 #parcour de la liste des commandes
 async def cmd(message):
     m=message.content.split()
@@ -60,10 +78,10 @@ async def cmd(message):
         cmd_dir = build(CMD_PATH)
         #TODO limiter la recherche à des message commencant par '!'
         if cmd_dir.get(str(m[0])):
-            print(" cmd trouvée")
+            print(" cmd trouvée\n")
             await client.send_message(message.channel,str(cmd_dir.get(str(m[0]))))
         else:
-            print(" pas de cmd trouvée")
+            print(" pas de cmd trouvée\n")
 
 async def addcmd(message):
     m=message.content.split()
@@ -79,13 +97,13 @@ async def addcmd(message):
 
     print ("    verification de l'existance de la commande")
     if cmd_dir.get(str(m[1])):
-        print ('        la commande existe deja')
+        print ('        la commande existe deja\n')
         await client.send_message(message.channel,'la commande existe deja')
     else:
         cmd_dir[str(m[1])]=str(m[2])
 
     save(cmd_dir,CMD_PATH)
-    print('commande',m[1],'->',m[2],'ajoutée')
+    print('commande',m[1],'->',m[2],'ajoutée\n')
     await client.send_message(message.channel,'commande ajoutée')
 
 # supprime la commande dans la liste
@@ -99,12 +117,12 @@ async def delcmd(message):
 
     print ("    verification de l'existance de la commande")
     if cmd_dir.get(str(m[1])):
-        print ('        la commande existe')
+        print ('        la commande existe\n')
         del cmd_dir[str(m[1])]
         save(cmd_dir,CMD_PATH)
         await client.send_message(message.channel,'commande supprimée')
     else:
-        print("     la commande n'existe pas ")
+        print("     la commande n'existe pas \n")
         await client.send_message(message.channel,"la commande n'existe pas")
 
 # gestion des points godwin
@@ -121,7 +139,7 @@ async def godwin(message):
             cible= member
             break
     if cible==None:
-        print(' client non trouvé')
+        print(' client non trouvé\n')
         await client.send_message(message.channel,"Personne n'a ce nom sur le serveur")
         return
     godwin_dir=build(GOD_PATH)
@@ -130,7 +148,7 @@ async def godwin(message):
     else:
         godwin_dir[str(m[1])]=1
     save(godwin_dir,GOD_PATH)
-    print('point attribué')
+    print('point attribué\n')
     messretour = "Félicitation "+str(m[1])+" cela vous fait "+str(godwin_dir[str(m[1])])+" points Godwin!\n  http://publigeekaire.com/wp-content/uploads/2011/04/point-godwin.jpg  "
     await client.send_message(message.channel,messretour)
 
@@ -145,7 +163,7 @@ async def clear(message):
     m=message.content.split()
     print(message.author,' supprime les ',m[1],' derniers messages\n')
     try:
-        max= int(m[1])+3
+        max= int(m[1])+2
     except Exception:
         await client.send_message(message.channel, 'vous devez entrer un int. exemple !clear 9')
     if(max > 10):
@@ -189,6 +207,8 @@ async def on_message(message):
         await godwin(message)
     if message.content.startswith('!botjoin'):
         await bot_join(message)
+    if message.content.startswith('!shodan'):
+        await sbot(message)
     else:
         await cmd(message)
 
