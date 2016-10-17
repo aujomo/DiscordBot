@@ -26,6 +26,7 @@ async def on_ready():
 
 CMD_PATH='./bot_files/cmd.pkl'
 GOD_PATH='./bot_files/ptgodwin.pkl'
+RELOU_PATH = './bot_files/relou.pkl'
 
 SHODAN_QUOTE=["Look at you, hacker: a pathetic creature of meat and bone, panting and sweating as you run through my corridors. How can you challenge a perfect, immortal machine? ",
 " I see there's still an insect loose in my station. ","My whims will become lightning bolts that raze the mounds of humanity.",
@@ -155,6 +156,33 @@ async def godwin(message):
     messretour = "Félicitations "+str(m[1])+", cela vous fait "+str(godwin_dir[str(m[1])])+" point(s) Godwin !\n  http://publigeekaire.com/wp-content/uploads/2011/04/point-godwin.jpg  "
     await client.send_message(message.channel,messretour)
 
+#gestion des points relou
+async def relou(message):
+    m = message.content.split()
+
+    if (len(m)!=2):
+        await client.send_message(message.channel,'mauvaise syntaxe, la commande !relou est de la forme !relou #user_name')
+        return
+    print("essaye d'ajouter un point relou à ",m[1],':')
+    cible = None
+    for member in message.server.members:
+        if member.name==m[1]:
+            cible= member
+            break
+    if cible==None:
+        print(' client non trouvé\n')
+        await client.send_message(message.channel,"Personne n'a ce nom sur le serveur, espèce de demeuré")
+        return
+    relou_dir=build(RELOU_PATH)
+    if relou_dir.get(str(m[1])):
+        relou_dir[str(m[1])]+=1
+    else:
+        relou_dir[str(m[1])]=1
+    save(relou_dir,RELOU_PATH)
+    print('point attribué\n')
+    messretour = "Franchement "+str(m[1])+", t'es relou. Déjà "+str(relou_dir[str(m[1])])+" point(s) Relou !"
+    await client.send_message(message.channel,messretour)
+
 
 # supprime les n derniers messages (et l'appel à la fonction)
 #TODO limiter les message que l'on peut supprimer
@@ -214,6 +242,8 @@ async def on_message(message):
         await delcmd(message)
     elif message.content.startswith('!godwin'):
         await godwin(message)
+    elif message.content.startswith('!relou'):
+        await relou(message)
     elif message.content.startswith('!botjoin'):
         await bot_join(message)
     elif message.content.startswith('!shodan'):
