@@ -39,6 +39,9 @@ SHODAN_QUOTE=["Look at you, hacker: a pathetic creature of meat and bone, pantin
 "If it sounds unpleasant to you, put your mind at ease, insect. You will not survive to see my new world order. ",
 "Prepare to join your species in extinction. ","Your flesh is an insult to the perfection of the digital. "]
 
+LENNY_EYES = ["͡°","⍤","ಠ","◉"]
+LENNY_MOUTHS = ["͜ʖ","ω"]
+
 """-------------gestion de la base de donnée---------------"""
 
 def save(dict, file_path):
@@ -187,6 +190,12 @@ async def bot_join(message):
     print(join_url[1])
     client.accept_invite(join_url[1])
 
+
+def lenny(message):
+    eye = random.randint(0, len(LENNY_EYES) - 1)
+    mouth = random.randint(0, len(LENNY_MOUTHS) - 1)
+    mess = "( " + LENNY_EYES[eye] + " " + LENNY_MOUTHS[mouth] + " " + LENNY_EYES[eye] + ")"
+    await client.send_message(message.channel, mess)
 # switch pour les differentes commandes
 @client.event
 async def on_message(message):
@@ -199,16 +208,18 @@ async def on_message(message):
         await fonc_exemple(message)"""
     if message.content.startswith('!clear'):
         await clear(message)
-    if message.content.startswith('!addcmd'):
+    elif message.content.startswith('!addcmd'):
         await addcmd(message)
-    if message.content.startswith('!delcmd'):
+    elif message.content.startswith('!delcmd'):
         await delcmd(message)
-    if message.content.startswith('!godwin'):
+    elif message.content.startswith('!godwin'):
         await godwin(message)
-    if message.content.startswith('!botjoin'):
+    elif message.content.startswith('!botjoin'):
         await bot_join(message)
-    if message.content.startswith('!shodan'):
+    elif message.content.startswith('!shodan'):
         await sbot(message)
+    elif message.content.startswith('!lenny'):
+        await lenny(message)
     else:
         await cmd(message)
 
