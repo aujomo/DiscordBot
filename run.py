@@ -1,4 +1,3 @@
-
 import os
 import sys
 import time
@@ -66,6 +65,11 @@ def build(file_path):
         data_dict = open_dir(file_path)
     return data_dict
 
+"""----------------fonctions utilitaires en vrac----------"""
+    
+def sort_points(data):
+    sorted_names = sorted( [(val,key) for (key,val) in data.items()], reverse=True)
+    return sorted_names
 
 """----------------gestion des commandes-------------------"""
 
@@ -224,6 +228,42 @@ async def lenny(message):
     mouth = random.randint(0, len(LENNY_MOUTHS) - 1)
     mess = "( " + LENNY_EYES[eye] + " " + LENNY_MOUTHS[mouth] + " " + LENNY_EYES[eye] + ")"
     await client.send_message(message.channel, mess)
+
+async def winners(message):
+    m = message.content.split()
+    if (len(m)!=2):
+        await client.send_message(message.channel,'mauvaise syntaxe, la commande !winners est de la forme !winners #point')
+        return
+    print(m)
+    if (m[1] != 'godwin' and m[1] != 'relou'):
+        print("requete inconnue")
+        await client.send_message(message.channel,'points godwin ou relou uniquement svp')
+        return
+    
+    if (m[1] == 'godwin'):
+        PATH = GOD_PATH
+        points = 'godwin'
+    elif (m[1] == 'relou'):
+        PATH = RELOU_PATH
+        points = 'relou'
+        
+    data = build(PATH)
+    sorted_names = sort_points(data)
+    
+    w_score,w_name = sorted_names.pop(0)
+    if points == 'godwin':
+        message_winner = "Bravo %s ! Hitler serait fier de toi, avec tes %s points Godwin !" %(w_name,w_score)
+    else:
+        message_winner = "Bravo %s ! Tu es vraiment super relou, avec tes %s points relou !" %(w_name,w_score)
+    
+    message_losers = ''
+    for score,name in sorted_names:
+        message_losers += "%s : %s\n" %(name,score)
+        
+    await client.send_message(message.channel,message_winner)
+    await client.send_message(message.channel,message_losers)
+
+        
 # switch pour les differentes commandes
 @client.event
 async def on_message(message):
@@ -244,6 +284,8 @@ async def on_message(message):
         await godwin(message)
     elif message.content.startswith('!relou'):
         await relou(message)
+    elif message.content.startswith('!winners'):
+        await winners(message)
     elif message.content.startswith('!botjoin'):
         await bot_join(message)
     elif message.content.startswith('!shodan'):
