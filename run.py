@@ -11,7 +11,7 @@ from xml.sax.saxutils import escape
 from xml.sax.saxutils import unescape
 
 client = discord.Client()
-
+random.seed(time.clock())
 @client.event
 async def on_ready():
     print('Logged in as')
