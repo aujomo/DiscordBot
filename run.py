@@ -95,7 +95,7 @@ async def addcmd(message):
     # TODO verification de la syntaxe des commandes
     cmd_dir= build(CMD_PATH)
 
-    print ("    verification de l'existance de la commande")
+    print ("    verification de l'existence de la commande")
     if cmd_dir.get(str(m[1])):
         print ('        la commande existe deja\n')
         await client.send_message(message.channel,'la commande existe deja')
@@ -115,7 +115,7 @@ async def delcmd(message):
     print('suppression de la commande',m[1],':')
     cmd_dir=build(CMD_PATH)
 
-    print ("    verification de l'existance de la commande")
+    print ("    verification de l'existence de la commande")
     if cmd_dir.get(str(m[1])):
         print ('        la commande existe\n')
         del cmd_dir[str(m[1])]
@@ -132,7 +132,7 @@ async def godwin(message):
     if (len(m)!=2):
         await client.send_message(message.channel,'mauvaise syntaxe, la commande !delcmd est de la forme !godwin #user_name')
         return
-    print("essail d'ajouter un point Godwin à ",m[1],':')
+    print("essaye d'ajouter un point Godwin à ",m[1],':')
     cible = None
     for member in message.server.members:
         if member.name==m[1]:
@@ -149,7 +149,7 @@ async def godwin(message):
         godwin_dir[str(m[1])]=1
     save(godwin_dir,GOD_PATH)
     print('point attribué\n')
-    messretour = "Félicitation "+str(m[1])+" cela vous fait "+str(godwin_dir[str(m[1])])+" points Godwin!\n  http://publigeekaire.com/wp-content/uploads/2011/04/point-godwin.jpg  "
+    messretour = "Félicitations "+str(m[1])+", cela vous fait "+str(godwin_dir[str(m[1])])+" point(s) Godwin !\n  http://publigeekaire.com/wp-content/uploads/2011/04/point-godwin.jpg  "
     await client.send_message(message.channel,messretour)
 
 
