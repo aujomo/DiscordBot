@@ -191,7 +191,7 @@ async def bot_join(message):
     client.accept_invite(join_url[1])
 
 
-def lenny(message):
+async def lenny(message):
     eye = random.randint(0, len(LENNY_EYES) - 1)
     mouth = random.randint(0, len(LENNY_MOUTHS) - 1)
     mess = "( " + LENNY_EYES[eye] + " " + LENNY_MOUTHS[mouth] + " " + LENNY_EYES[eye] + ")"
