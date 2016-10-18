@@ -27,6 +27,18 @@ CMD_PATH='./bot_files/cmd.pkl'
 GOD_PATH='./bot_files/ptgodwin.pkl'
 RELOU_PATH = './bot_files/relou.pkl'
 
+command_list = sorted(
+    ['!help','!lenny','!addcmd','!delcmd','!shodan','!clear','!winners','!relou','!godwin'])
+command_help = {'!addcmd': "!addmcd <commande> <résultat> -> ajoute une commande <commande> -> <résultat> à BotR-2Q",
+                '!delcmd' : "!delcmd <commande> -> enlève la commande <commande> ajoutée via !addcmd",
+                '!clear' : "!clear <num> -> supprime les <num> derniers messages",
+                '!godwin' : "!godwin <user> -> ajoute un point godwin à <user>",
+                '!help' : "!help -> si tu vois ça tu sais comment ça marche",
+                '!lenny' : "( ͡° ͜ʖ ͡°)",
+                '!relou' : "!relou <user> -> ajoute un point relou à <user>",
+                '!shodan' : "!shodan -> affiche une citation aléatoire de Shodan",
+                '!winners' : "!winners relou/godwin -> affiche les plus relous/plus nazis du chat" }
+
 SHODAN_QUOTE=["Look at you, hacker: a pathetic creature of meat and bone, panting and sweating as you run through my corridors. How can you challenge a perfect, immortal machine? ",
 " I see there's still an insect loose in my station. ","My whims will become lightning bolts that raze the mounds of humanity.",
 "You disappoint me, my children.","When my cyborgs bring you to an electrified interrogation bench, I will have your secrets and you will learn more about pain than you ever wanted to know. ",
@@ -71,12 +83,34 @@ def sort_points(data):
     sorted_names = sorted( [(val,key) for (key,val) in data.items()], reverse=True)
     return sorted_names
 
+def is_command(s,command):
+    return s ==command or '!'+s == command
+
+def find_help_string(request):
+    return command_help.get(request,'"%s" non trouvé dans la liste des commandes' %request)
+
 """----------------gestion des commandes-------------------"""
 
 #SHODAN_QUOTE
 async def sbot(message):
     n=random.randint(0, len(SHODAN_QUOTE) - 1)
     await client.send_message(message.channel, SHODAN_QUOTE[n])
+
+async def show_help(message):
+    m = message.content.split()
+    
+    if (len(m) == 1):
+        print('affichage de la liste de commandes')
+        mess = "commandes disponibles : %s" %command_list
+        mess += "\npour plus d'infos sur une commande : !help <commande>"
+        
+    elif (len(m) == 2):
+        mess = find_help_string(m[1])
+        
+    else:
+        return
+    
+    await client.send_message(message.channel,mess)
 
 #parcour de la liste des commandes
 async def cmd(message):
@@ -294,6 +328,8 @@ async def on_message(message):
         await sbot(message)
     elif message.content.startswith('!lenny'):
         await lenny(message)
+    elif message.content.startswith('!help'):
+        await show_help(message)
     else:
         await cmd(message)
 
