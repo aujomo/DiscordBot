@@ -40,7 +40,7 @@ SHODAN_QUOTE=["Look at you, hacker: a pathetic creature of meat and bone, pantin
 "Prepare to join your species in extinction. ","Your flesh is an insult to the perfection of the digital. "]
 
 LENNY_EYES = ["͡°","⍤","ಠ","◉"]
-LENNY_MOUTHS = ["͜ʖ","ω"]
+LENNY_MOUTHS = ["͜ʖ","ω","╭͜ʖ╮","◡"]
 
 """-------------gestion de la base de donnée---------------"""
 
@@ -227,6 +227,8 @@ async def lenny(message):
     eye = random.randint(0, len(LENNY_EYES) - 1)
     mouth = random.randint(0, len(LENNY_MOUTHS) - 1)
     mess = "( " + LENNY_EYES[eye] + " " + LENNY_MOUTHS[mouth] + " " + LENNY_EYES[eye] + ")"
+    channel = message.channel
+    await client.delete_message(message)
     await client.send_message(message.channel, mess)
 
 async def winners(message):
