@@ -94,6 +94,7 @@ def find_help_string(request):
 #SHODAN_QUOTE
 async def sbot(message):
     n=random.randint(0, len(SHODAN_QUOTE) - 1)
+    await client.delete_message(message)
     await client.send_message(message.channel, SHODAN_QUOTE[n])
 
 async def show_help(message):
