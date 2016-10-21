@@ -11,13 +11,25 @@ from xml.sax.saxutils import unescape
 
 client = discord.Client()
 random.seed(time.clock())
+
+
+
 @client.event
 async def on_ready():
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
+    #begin ugly code
+    chans = list(client.get_all_channels())
+    for chan in chans:
+        if chan.name == "general":
+            general_id = chan.id
+            break
+    #yuck
+    await client.send_message(client.get_channel(general_id),"coucou les amis :robot:")
 
+    
 """async def fonc_exemple(message):
     print("test\n")
     msg = 'Hello {0.author.mention}'.format(message)
@@ -271,7 +283,6 @@ async def winners(message):
     if (len(m)!=2):
         await client.send_message(message.channel,'mauvaise syntaxe, la commande !winners est de la forme !winners #point')
         return
-    print(m)
     if (m[1] != 'godwin' and m[1] != 'relou'):
         print("requete inconnue")
         await client.send_message(message.channel,'points godwin ou relou uniquement svp')
@@ -309,8 +320,6 @@ async def on_message(message):
         return
 
     author = message.author
-    """if message.content.startswith('!test'):
-        await fonc_exemple(message)"""
     if message.content.startswith('!clear'):
         await clear(message)
     elif message.content.startswith('!addcmd'):
