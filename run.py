@@ -39,6 +39,9 @@ CMD_PATH='./bot_files/cmd.pkl'
 GOD_PATH='./bot_files/ptgodwin.pkl'
 RELOU_PATH = './bot_files/relou.pkl'
 
+last_goodnight = 0
+goodnight_threshold = 60
+
 command_list = sorted(
     ['!help','!lenny','!addcmd','!delcmd','!shodan','!clear','!winners','!relou','!godwin'])
 command_help = {'!addcmd': "!addmcd <commande> <résultat> -> ajoute une commande <commande> -> <résultat> à BotR-2Q",
@@ -311,6 +314,34 @@ async def winners(message):
     await client.send_message(message.channel,message_winner)
     await client.send_message(message.channel,message_losers)
 
+def random_dream():
+    nightmares = ["Nicolas Sarkozy",
+                  "l'ordinateur portable d'Edward",
+                  "le monstre sous ton lit",
+                  "nous :(" ]
+    good_dreams = ["les chats de Lucas",
+                   "le chat de Juliette",
+                   "le chat de Tassos",
+                   "le chocolat",
+                   "la bière",
+                   "nous :)" ]
+    r = random.randint(0,1)
+    if r == 0:
+        return "Rêve de choses agréables, comme %s"  %good_dreams[random.randint(0,len(good_dreams) - 1)]
+    return "Surtout ne rêve pas de choses qui font peur, comme %s" %nightmares[random.randint(0,len(nightmares) - 1)]
+
+def is_goodnight(message):
+    content = message.content.lower()
+    if 'good night' in content or 'bonne nuit' in content or "'nuit" in content:
+      if message.timestamp - last_goodnight > goodnight_threshold:
+          last_goodnight = message.timestamp
+          return True
+
+
+async def goodnight(message):
+    m = "Bonne nuit %s \\(^_^)/\n" %message.author
+    m += random_dream()
+    await client.send_message(message.channel,m)
         
 # switch pour les differentes commandes
 @client.event
@@ -340,6 +371,8 @@ async def on_message(message):
         await lenny(message)
     elif message.content.startswith('!help'):
         await show_help(message)
+    elif is_goodnight_message(message):
+        goodnight(message)
     else:
         await cmd(message)
 
