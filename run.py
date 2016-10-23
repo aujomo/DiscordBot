@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import datetime
 import asyncio
 import discord
 import pickle
@@ -39,7 +40,7 @@ CMD_PATH='./bot_files/cmd.pkl'
 GOD_PATH='./bot_files/ptgodwin.pkl'
 RELOU_PATH = './bot_files/relou.pkl'
 
-last_goodnight = 0
+last_goodnight = datetime.datetime.fromtimestamp(time.time())
 goodnight_threshold = 60
 
 command_list = sorted(
@@ -330,16 +331,17 @@ def random_dream():
         return "Rêve de choses agréables, comme %s"  %good_dreams[random.randint(0,len(good_dreams) - 1)]
     return "Surtout ne rêve pas de choses qui font peur, comme %s" %nightmares[random.randint(0,len(nightmares) - 1)]
 
-def is_goodnight(message):
+def is_goodnight_message(message):
+    global last_goodnight, goodnight_threshold
     content = message.content.lower()
     if 'good night' in content or 'bonne nuit' in content or "'nuit" in content:
-      if message.timestamp - last_goodnight > goodnight_threshold:
+      if (message.timestamp - last_goodnight).days > 0 or (message.timestamp - last_goodnight).seconds > goodnight_threshold:
           last_goodnight = message.timestamp
           return True
 
 
 async def goodnight(message):
-    m = "Bonne nuit %s \\(^_^)/\n" %message.author
+    m = "Bonne nuit %s \\\\(^_^)/\n" %message.author.split('#')[0]
     m += random_dream()
     await client.send_message(message.channel,m)
         
@@ -372,7 +374,7 @@ async def on_message(message):
     elif message.content.startswith('!help'):
         await show_help(message)
     elif is_goodnight_message(message):
-        goodnight(message)
+        await goodnight(message)
     else:
         await cmd(message)
 
