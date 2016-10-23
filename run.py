@@ -39,12 +39,14 @@ async def on_ready():
 CMD_PATH='./bot_files/cmd.pkl'
 GOD_PATH='./bot_files/ptgodwin.pkl'
 RELOU_PATH = './bot_files/relou.pkl'
+POINTS_PATH = './bot_files/points.pkl'
 
 last_goodnight = datetime.datetime.fromtimestamp(time.time())
 goodnight_threshold = 60
 
 command_list = sorted(
     ['!help','!lenny','!addcmd','!delcmd','!shodan','!clear','!winners','!relou','!godwin'])
+
 command_help = {'!addcmd': "!addmcd <commande> <résultat> -> ajoute une commande <commande> -> <résultat> à BotR-2Q",
                 '!delcmd' : "!delcmd <commande> -> enlève la commande <commande> ajoutée via !addcmd",
                 '!clear' : "!clear <num> -> supprime les <num> derniers messages",
@@ -104,6 +106,13 @@ def is_command(s,command):
 
 def find_help_string(request):
     return command_help.get(request,'"%s" non trouvé dans la liste des commandes' %request)
+
+def return_member(query_member):
+    for member in message.server.members:
+        if member.name == query_member:
+            return member
+    return None
+
 
 """----------------gestion des commandes-------------------"""
 
@@ -344,7 +353,35 @@ async def goodnight(message):
     m = "Bonne nuit %s \\\\(^_^)/\n" %message.author.split('#')[0]
     m += random_dream()
     await client.send_message(message.channel,m)
+
+async def add_custom_point(message):
+    m = message.content.split()
+    if (len(m) != 2):
+        await client.send_message(message.channel,"j'ai rien compris à ce que tu me demandes")
+        return
+    member = return_member(m[1])
+    if member == None:
+        await client.send_message(message.channel,"Personne ne s'appelle %s sur ce serveur, banane" %m[1])
+        return
+    member_name = m[1]
+    point_type = m[0][1:]
+    points_dict = build(POINTS_PATH)
+    total_points = points_dict[point_type].get(member_name)
+    if total_points == None:
+        points_dict[point_type][member_name] = 1
+        bot_message = "Bravo %s pour ton premier point %s !\n:thumbsup:" %(member_name,point_type)
+    else:
+        points_dict[point_type][member_name] += 1
+        bot_message = "Bravo %s, déjà %s points %s !\n:thumbsup:" %(member_name,point_type)
         
+    try:
+        save(point_dict,POINTS_PATH)
+    except:
+        bot_message = "Oh non y a eu une couille dans le potage et j'ai pas pu enregistrer les points :("
+
+    await client.send_message(message.channel, bot_message)
+
+
 # switch pour les differentes commandes
 @client.event
 async def on_message(message):
@@ -375,6 +412,8 @@ async def on_message(message):
         await show_help(message)
     elif is_goodnight_message(message):
         await goodnight(message)
+    elif message.content.startswith('!'):
+        await add_custom_point(message)
     else:
         await cmd(message)
 
