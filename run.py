@@ -342,8 +342,12 @@ def random_dream():
 
 def is_goodnight_message(message):
     global last_goodnight, goodnight_threshold
-    content = message.content.lower()
-    if 'good night' in content or 'bonne nuit' in content or "'nuit" in content:
+
+    #supprimer les espaces en trop et passer en minuscules en une ligne plutot que deux
+    content = ' '.join(message.content.lower().split())
+
+    triggers = ["good night","bonne nuit","'nuit","je vais me coucher"]
+    if content in triggers:
       if (message.timestamp - last_goodnight).days > 0 or (message.timestamp - last_goodnight).seconds > goodnight_threshold:
           last_goodnight = message.timestamp
           return True
