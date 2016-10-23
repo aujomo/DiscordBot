@@ -350,7 +350,7 @@ def is_goodnight_message(message):
 
 
 async def goodnight(message):
-    m = "Bonne nuit %s \\\\(^_^)/\n" %message.author.split('#')[0]
+    m = "Bonne nuit %s \\\\(^_^)/\n" %(str(message.author).split('#')[0])
     m += random_dream()
     await client.send_message(message.channel,m)
 
