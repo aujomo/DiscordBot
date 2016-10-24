@@ -345,12 +345,13 @@ def is_goodnight_message(message):
 
     #supprimer les espaces en trop et passer en minuscules en une ligne plutot que deux
     content = ' '.join(message.content.lower().split())
-
     triggers = ["good night","bonne nuit","'nuit","je vais me coucher"]
-    if content in triggers:
-      if (message.timestamp - last_goodnight).days > 0 or (message.timestamp - last_goodnight).seconds > goodnight_threshold:
-          last_goodnight = message.timestamp
-          return True
+    for trigger in triggers:
+        if trigger in content:
+            if (message.timestamp - last_goodnight).days > 0 or (message.timestamp - last_goodnight).seconds > goodnight_threshold:
+                last_goodnight = message.timestamp
+                return True
+    return False
 
 
 async def goodnight(message):
