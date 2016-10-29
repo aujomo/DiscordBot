@@ -28,7 +28,8 @@ async def on_ready():
             general_id = chan.id
             break
     #yuck
-    await client.send_message(client.get_channel(general_id),"coucou les amis :robot:")
+    message = "coucou les amis :robot:\n"
+    await client.send_message(client.get_channel(general_id),message)
 
     
 """async def fonc_exemple(message):
@@ -55,7 +56,7 @@ command_help = {'!addcmd': "!addmcd <commande> <résultat> -> ajoute une command
                 '!lenny' : "( ͡° ͜ʖ ͡°)",
                 '!relou' : "!relou <user> -> ajoute un point relou à <user>",
                 '!shodan' : "!shodan -> affiche une citation aléatoire de Shodan",
-                '!winners' : "!winners relou/godwin -> affiche les plus relous/plus nazis du chat" }
+                '!winners' : "!winners <point> -> affiche le top des points <point>" }
 
 SHODAN_QUOTE=["Look at you, hacker: a pathetic creature of meat and bone, panting and sweating as you run through my corridors. How can you challenge a perfect, immortal machine? ",
 " I see there's still an insect loose in my station. ","My whims will become lightning bolts that raze the mounds of humanity.",
@@ -107,7 +108,7 @@ def is_command(s,command):
 def find_help_string(request):
     return command_help.get(request,'"%s" non trouvé dans la liste des commandes' %request)
 
-def return_member(query_member):
+def return_member(message,query_member):
     for member in message.server.members:
         if member.name == query_member:
             return member
@@ -294,35 +295,42 @@ async def lenny(message):
 async def winners(message):
     m = message.content.split()
     if (len(m)!=2):
-        await client.send_message(message.channel,'mauvaise syntaxe, la commande !winners est de la forme !winners #point')
+        await client.send_message(message.channel,'mauvaise syntaxe, la commande !winners est de la forme !winners <point>')
         return
-    if (m[1] != 'godwin' and m[1] != 'relou'):
-        print("requete inconnue")
-        await client.send_message(message.channel,'points godwin ou relou uniquement svp')
-        return
+    points = m[1]
+    if points == 'godwin' or points == 'relou':
+        PATH = points.upper() + "_PATH"
+        data = build(PATH)
+        sorted_names = sort_points(data)
+        w_score,w_name = sorted_names.pop(0)
+        if points == 'godwin':
+            message_winner = "Bravo %s ! Hitler serait fier de toi, avec tes %s points Godwin !" %(w_name,w_score)
+        else:
+            message_winner = "Bravo %s ! Tu es vraiment super relou, avec tes %s points relou !" %(w_name,w_score)
     
-    if (m[1] == 'godwin'):
-        PATH = GOD_PATH
-        points = 'godwin'
-    elif (m[1] == 'relou'):
-        PATH = RELOU_PATH
-        points = 'relou'
+        message_losers = ''
+        for score,name in sorted_names:
+            message_losers += "%s : %s\n" %(name,score)
         
-    data = build(PATH)
-    sorted_names = sort_points(data)
-    
-    w_score,w_name = sorted_names.pop(0)
-    if points == 'godwin':
-        message_winner = "Bravo %s ! Hitler serait fier de toi, avec tes %s points Godwin !" %(w_name,w_score)
+        await client.send_message(message.channel,message_winner)
+        await client.send_message(message.channel,message_losers)
+        
     else:
-        message_winner = "Bravo %s ! Tu es vraiment super relou, avec tes %s points relou !" %(w_name,w_score)
-    
-    message_losers = ''
-    for score,name in sorted_names:
-        message_losers += "%s : %s\n" %(name,score)
-        
-    await client.send_message(message.channel,message_winner)
-    await client.send_message(message.channel,message_losers)
+        PATH = POINTS_PATH
+        points_dict = build(POINTS_PATH)
+        points_list = points_dict.get(points,None)
+        if points_list == None:
+            await client.send_message(message.channel,"yapa de points %s" %points)
+        else:
+            sorted_names = sort_points(points_list)
+            w_score,w_name = sorted_names.pop(0)
+            message_losers = ''
+            for score,name in sorted_names:
+                message_losers += "%s : %s\n" %(name,score)
+            message_winner = "Bravo %s ! Tu es vraiment le/la %s-king/%s-queen (rayer la mention inutile), avec %s points %s" %(w_name,points,points,w_score,points)
+            await client.send_message(message.channel,message_winner)
+            await client.send_message(message.channel,message_losers)
+            
 
 def random_dream():
     nightmares = ["Nicolas Sarkozy",
@@ -361,30 +369,85 @@ async def goodnight(message):
 
 async def add_custom_point(message):
     m = message.content.split()
-    if (len(m) != 2):
+    if (len(m) != 3):
         await client.send_message(message.channel,"j'ai rien compris à ce que tu me demandes")
         return
-    member = return_member(m[1])
+    member = return_member(message,m[2])
     if member == None:
-        await client.send_message(message.channel,"Personne ne s'appelle %s sur ce serveur, banane" %m[1])
+        await client.send_message(message.channel,"Personne ne s'appelle %s sur ce serveur, banane" %m[2])
         return
-    member_name = m[1]
-    point_type = m[0][1:]
+    member_name = m[2]
+    point_type = m[1]
     points_dict = build(POINTS_PATH)
-    total_points = points_dict[point_type].get(member_name)
-    if total_points == None:
+    
+    if points_dict.get(point_type,None) == None:
+        points_dict[point_type] = dict()
         points_dict[point_type][member_name] = 1
         bot_message = "Bravo %s pour ton premier point %s !\n:thumbsup:" %(member_name,point_type)
-    else:
-        points_dict[point_type][member_name] += 1
-        bot_message = "Bravo %s, déjà %s points %s !\n:thumbsup:" %(member_name,point_type)
         
-    try:
-        save(point_dict,POINTS_PATH)
-    except:
-        bot_message = "Oh non y a eu une couille dans le potage et j'ai pas pu enregistrer les points :("
+    else:
+        total_points = points_dict[point_type].get(member_name)
+    
+        if total_points == None:
+            points_dict[point_type][member_name] = 1
+            bot_message = "Bravo %s pour ton premier point %s !\n:thumbsup:" %(member_name,point_type)
+        else:
+            points_dict[point_type][member_name] += 1
+            bot_message = "Bravo %s, déjà %s points %s !\n:thumbsup:" %(member_name,total_points+1,point_type)
+        
+    save(points_dict,POINTS_PATH)
 
     await client.send_message(message.channel, bot_message)
+
+async def remove_custom_point(message):    
+    m = message.content.split()
+    if (len(m) != 3):
+        await client.send_message(message.channel,"j'ai rien compris à ce que tu me demandes")
+        return
+    member = return_member(message,m[2])
+    if member == None:
+        await client.send_message(message.channel,"Personne ne s'appelle %s sur ce serveur, banane" %m[2])
+        return
+    member_name = m[2]
+    point_type = m[1]
+    points_dict = build(POINTS_PATH)
+    
+    if points_dict.get(point_type,None) == None:
+        bot_message = "Ça existe pas les points %s, nunuche" %point_type
+        
+    else:
+        total_points = points_dict[point_type].get(member_name)
+    
+        if total_points == None or total_points == 0:
+            bot_message = "%s n'a pas de points %s, faut vraiment être bête pour penser un truc pareil" %(member_name,point_type)
+        else:
+            points_dict[point_type][member_name] -= 1
+            bot_message = "Un point %s retiré à %s" %(point_type,member_name)
+        
+    save(points_dict,POINTS_PATH)
+
+    await client.send_message(message.channel, bot_message)
+    
+async def list_points(message):
+    m = message.content.split()
+    if (len(m) != 2):
+        await client.send_message(message.channel,"nan")
+        return
+    member = return_member(message, m[1])
+    if member == None and m[1] != all:
+        await client.send_message(message.channel,"Personne ne s'appelle %s sur ce serveur, teubé" %m[2])
+        return
+    if m[1] == all:
+        pass
+    else:
+        await client.send_message('prout')
+
+async def list_todos(message):
+    m = message.content.split()
+    if len(m) != 1:
+        await client.send_message(message.channel,"non")
+    else:
+        await client.send_message(message.channel,"finir cette fonction, pour commencer")
 
 
 # switch pour les differentes commandes
@@ -417,8 +480,14 @@ async def on_message(message):
         await show_help(message)
     elif is_goodnight_message(message):
         await goodnight(message)
-    elif message.content.startswith('!'):
+    elif message.content.startswith('!addpoint'):
         await add_custom_point(message)
+    elif message.content.startswith('!removepoint'):
+        await remove_custom_point(message)
+    elif message.content.startswith('!listpoints'):
+        await list_points(message)
+    elif message.content.startswith('!todo'):
+        await list_todos(message)
     else:
         await cmd(message)
 
